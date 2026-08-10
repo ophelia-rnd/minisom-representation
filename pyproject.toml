@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "minisom-representation"
+description = "An advanced wrapper around MiniSom"
+requires-python = ">=3.9"
+authors = [{name = "Mate Balogh", email = "matebalogh@ophelia-rnd.dev"}]
+maintainers = [{name = "Mate Balogh", email = "matebalogh@ophelia-rnd.dev"}]
+license = "Apache-2.0"
+dynamic = ["version"]
+
+# Core dependencies installed when users run `pip install my-library`
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "minisom"
+]
+
+# Optional/development dependencies installed via `pip install -e .[dev]`
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "jupyter",
+    "scikit-learn",
+]
+
+[tool.setuptools.dynamic]
+version = { attr = "minisom_representation.__version__" }

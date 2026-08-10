@@ -2,4 +2,4 @@
 
 ---
 
-# Project Name
+# MiniSom Representation

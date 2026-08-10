@@ -1,0 +1,5 @@
+<img width="30%" alt="Ophelia R&D logo" src="assets/ophelia_rnd_logo.png" />
+
+---
+
+# Project Name

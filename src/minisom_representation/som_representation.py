@@ -26,10 +26,10 @@ class SomRepresentation():
         self.verbose = verbose
 
     @classmethod
-    def with_derived_params(cls, X, random_seed=None, verbose=False, **kwargs):
-        """Derives d1, d2, sigma from X, forwarding any extra overrides to __init__."""
-        derived_params = calc_som_hyparams(X, verbose=verbose)
-        return cls(random_seed=random_seed, verbose=verbose, **{**derived_params, **kwargs})
+    def with_derived_params(cls, X, **kwargs):
+        """Derives grid shape (d1, d2) and sigma from X, allowing explicit keyword overrides."""
+        derived_params = calc_som_hyparams(X, verbose=kwargs.get("verbose", False))
+        return cls(**{**derived_params, **kwargs})
 
     @property
     def som(self):
@@ -87,13 +87,10 @@ class SomRepresentation():
         som.random_weights_init(X)
         som.train_batch_offline(X, **som_train_hyperparams)
 
-        QE = som.quantization_error(X)
-        TE = som.topographic_error(X)
-
-        self.som_ = som
-        self.distance_map_ = som.distance_map(scaling=self.distance_map_scaling)
-        self.activation_map_ = som.activation_response(X)
-
+        self.node_weights_ = som.get_weights().copy()
+        self.component_size_ = self.node_weights_.shape[2]
+        self.distance_map_ = som.distance_map(scaling=self.distance_map_scaling).copy()
+        self.activation_map_ = som.activation_response(X).copy()
         self.lattice_shape_ = self.distance_map_.shape
         self.rows_, self.cols_ = self.distance_map_.shape
 
@@ -116,9 +113,10 @@ class SomRepresentation():
         self.unique_b2mu_counts_ = unique_b2mu_counts
         self.unique_b2mu_distances_ = unique_b2mu_distances
 
-        self.QE_ = QE
-        self.TE_ = TE
+        self.QE_ = som.quantization_error(X)
+        self.TE_ = som.topographic_error(X)
 
+        self.som_ = som
         self.fitted_ = True
 
         if self.verbose:
@@ -131,8 +129,8 @@ class SomRepresentation():
             }, "\n")
 
             print("Quality of SOM:", "\n")
-            print(f"Quantization Error (QE):\t{QE}")
-            print(f"Topographic Error (TE): \t{TE}")
+            print(f"Quantization Error (QE):\t{self.QE_}")
+            print(f"Topographic Error (TE): \t{self.TE_}")
 
         return self
 

@@ -1,3 +1,5 @@
+import numpy as np
+
 from minisom import MiniSom
 from minisom_representation.som_hyperparameter import calc_som_hyparams
 from typing import Literal
@@ -45,6 +47,12 @@ class SomRepresentation():
         return self.activation_map_.astype(int)
 
     @property
+    def unique_b2mu_edges_counts_distances(self):
+        """Returns a tuple of unique edges (a1 b1 a2 b2), counts, and distances"""
+        self.__require_fitted()
+        return self.unique_b2mu_edges_, self.unique_b2mu_counts_, self.unique_b2mu_distances_
+
+    @property
     def quantization_error(self):
         self.__require_fitted()
         return self.QE_
@@ -85,6 +93,28 @@ class SomRepresentation():
         self.som_ = som
         self.distance_map_ = som.distance_map(scaling=self.distance_map_scaling)
         self.activation_map_ = som.activation_response(X)
+
+        self.lattice_shape_ = self.distance_map_.shape
+        self.rows_, self.cols_ = self.distance_map_.shape
+
+        b2mu_flat_inds_ = np.argsort(som._distance_from_weights(X), axis=1)[:, :2]
+        b2mu_x_inds, b2mu_y_inds = np.unravel_index(b2mu_flat_inds_, self.lattice_shape_)
+        b2mu_flat_inds_distance_ = np.linalg.norm(
+            np.hstack([np.diff(b2mu_x_inds), np.diff(b2mu_y_inds)]),
+            axis=1
+        )
+
+        bmus_1 = np.column_stack([b2mu_x_inds[:, 0], b2mu_y_inds[:, 0]])
+        bmus_2 = np.column_stack([b2mu_x_inds[:, 1], b2mu_y_inds[:, 1]])
+        b2mu_edges = np.sort(np.stack([bmus_1, bmus_2], axis=1), axis=1).reshape(-1, 4)
+        unique_b2mu_edges, unique_b2mu_flat_inds, unique_b2mu_counts = np.unique(
+            b2mu_edges, axis=0, return_index=True, return_counts=True
+        )
+        unique_b2mu_distances = b2mu_flat_inds_distance_[unique_b2mu_flat_inds]
+
+        self.unique_b2mu_edges_ = unique_b2mu_edges
+        self.unique_b2mu_counts_ = unique_b2mu_counts
+        self.unique_b2mu_distances_ = unique_b2mu_distances
 
         self.QE_ = QE
         self.TE_ = TE

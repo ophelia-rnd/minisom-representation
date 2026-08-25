@@ -10,10 +10,10 @@ def calc_recommended_total_node_count(X):
 def calc_recommended_lattice_side_ratio(X):
     cov = np.cov(X, rowvar=False)
     eigvals = np.linalg.eigvalsh(cov)
-    eigvals = np.sort(eigvals)[::-1]
-    lambdas = eigvals[:2]
-    lambdas = np.clip(lambdas, a_min=1, a_max=None)
-    lambda1, lambda2 = lambdas
+    lambda2, lambda1 = eigvals[-2:]
+    eps = 1e-8
+    lambda1 = max(float(lambda1), eps)
+    lambda2 = max(float(lambda2), eps)
     ratio = np.sqrt(lambda1 / lambda2)
     return ratio
 

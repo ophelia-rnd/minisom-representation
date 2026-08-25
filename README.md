@@ -3,3 +3,5 @@
 ---
 
 # MiniSom Representation
+
+An advanced wrapper around MiniSom

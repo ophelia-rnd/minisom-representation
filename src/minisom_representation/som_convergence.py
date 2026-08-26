@@ -1,12 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from typing import Literal
+
 from minisom_representation.som_representation import SomRepresentation
 from minisom_representation.utils.attribute import extract_attributes
 
 def plot_som_convergence_over_epochs(
         skeleton:SomRepresentation,
         X,
+        fit_type:Literal["online", "offline"]="online",
         epoch_step=2,
         epoch_step_from=2,
         epoch_step_to=6,
@@ -28,10 +31,11 @@ def plot_som_convergence_over_epochs(
         if verbose:
             print(f"Training SOM for {epoch} epochs...")
 
-        params.update({"num_iteration": epoch})
-
         som_rep = SomRepresentation(**params)
-        som_rep.fit(X)
+        if fit_type == "online":
+            som_rep.fit_online(X, num_iteration=epoch)
+        else:
+            som_rep.fit_offline(X, num_iteration=epoch)
         qes.append(som_rep.quantization_error)
         tes.append(som_rep.topographic_error)
 

@@ -6,7 +6,7 @@ from typing import Literal
 
 class SomRepresentation():
 
-    def __init__(self, d1, d2, sigma=1.0, topology="rectangular", learning_rate=0.5, num_iteration=20,
+    def __init__(self, d1, d2, sigma=1.0, topology="rectangular", learning_rate=0.5,
                     decay_function="asymptotic_decay", sigma_decay_function="asymptotic_decay",
                     neighborhood_function='gaussian', activation_distance='euclidean',
                     distance_map_scaling:Literal["mean", "sum"]="mean",
@@ -16,7 +16,6 @@ class SomRepresentation():
         self.sigma = sigma
         self.topology = topology
         self.learning_rate = learning_rate
-        self.num_iteration = num_iteration
         self.decay_function = decay_function
         self.sigma_decay_function = sigma_decay_function
         self.neighborhood_function = neighborhood_function
@@ -62,9 +61,29 @@ class SomRepresentation():
         self.__require_fitted()
         return self.TE_
 
-    def fit(self, X):
+    def fit_online(self, X, num_iteration=20, use_epochs=True, random_order=True):
+        self.fit_type_ = "online"
+        self.fit_hyperparams_ = {
+            "num_iteration": num_iteration,
+            "use_epochs": use_epochs,
+            "random_order": random_order,
+            "verbose": self.verbose
+        }
+        self.__fit(X, minisom_fit_method=MiniSom.train, minisom_fit_hyperparams=self.fit_hyperparams_)
+        return self
 
-        som_hyperparams = {
+    def fit_offline(self, X, num_iteration=20):
+        self.fit_type_ = "offline"
+        self.fit_hyperparams_ = {
+            "num_iteration": num_iteration,
+            "verbose": self.verbose
+        }
+        self.__fit(X, minisom_fit_method=MiniSom.train_batch_offline, minisom_fit_hyperparams=self.fit_hyperparams_)
+        return self
+
+    def __fit(self, X, minisom_fit_method, minisom_fit_hyperparams):
+
+        minisom_hyperparams = {
             "input_len": X.shape[1],
             "x": self.d1,
             "y": self.d2,
@@ -78,14 +97,9 @@ class SomRepresentation():
             "random_seed": self.random_seed
         }
 
-        som_train_hyperparams = {
-            "num_iteration": self.num_iteration,
-            "verbose": self.verbose
-        }
-
-        som = MiniSom(**som_hyperparams)
+        som = MiniSom(**minisom_hyperparams)
         som.random_weights_init(X)
-        som.train_batch_offline(X, **som_train_hyperparams)
+        minisom_fit_method(som, X, **minisom_fit_hyperparams)
 
         self.node_weights_ = som.get_weights().copy()
         self.component_size_ = self.node_weights_.shape[2]
@@ -122,10 +136,11 @@ class SomRepresentation():
         if self.verbose:
             print("\n", "An SOM representation has been fitted as follows:")
             print("-------------------------------------------------------", "\n")
+            print("Fit strategy:", self.fit_type_, "\n")
             print("Hyperparameters of SOM:", "\n")
             print({
-                **som_hyperparams,
-                **som_train_hyperparams
+                **minisom_hyperparams,
+                **minisom_fit_hyperparams
             }, "\n")
 
             print("Quality of SOM:", "\n")

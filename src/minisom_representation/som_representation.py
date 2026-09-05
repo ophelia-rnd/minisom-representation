@@ -115,17 +115,16 @@ class SomRepresentation():
             axis=1
         )
 
-        bmus_1 = np.column_stack([b2mu_x_inds[:, 0], b2mu_y_inds[:, 0]])
-        bmus_2 = np.column_stack([b2mu_x_inds[:, 1], b2mu_y_inds[:, 1]])
-        b2mu_edges = np.sort(np.stack([bmus_1, bmus_2], axis=1), axis=1).reshape(-1, 4)
-        unique_b2mu_edges, unique_b2mu_flat_inds, unique_b2mu_counts = np.unique(
-            b2mu_edges, axis=0, return_index=True, return_counts=True
-        )
-        unique_b2mu_distances = b2mu_flat_inds_distance_[unique_b2mu_flat_inds]
+        reordered_b2mu_x_inds, reordered_b2mu_y_inds = np.unravel_index(np.sort(b2mu_flat_inds_, axis=1), self.lattice_shape_)
+        reordered_b2mu_edges = np.column_stack([
+            reordered_b2mu_x_inds[:, 0], reordered_b2mu_y_inds[:, 0],
+            reordered_b2mu_x_inds[:, 1], reordered_b2mu_y_inds[:, 1]
+        ])
+        unique_b2mu_edges, unique_b2mu_flat_inds, unique_b2mu_counts = np.unique(reordered_b2mu_edges, axis=0, return_index=True, return_counts=True)
 
         self.unique_b2mu_edges_ = unique_b2mu_edges
         self.unique_b2mu_counts_ = unique_b2mu_counts
-        self.unique_b2mu_distances_ = unique_b2mu_distances
+        self.unique_b2mu_distances_ = b2mu_flat_inds_distance_[unique_b2mu_flat_inds]
 
         self.QE_ = som.quantization_error(X)
         self.TE_ = som.topographic_error(X)

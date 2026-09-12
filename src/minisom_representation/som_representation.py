@@ -108,28 +108,16 @@ class SomRepresentation():
         self.lattice_shape_ = self.distance_map_.shape
         self.rows_, self.cols_ = self.distance_map_.shape
 
-        b2mu_flat_inds_ = np.argsort(som._distance_from_weights(X), axis=1)[:, :2]
-        b2mu_x_inds, b2mu_y_inds = np.unravel_index(b2mu_flat_inds_, self.lattice_shape_)
-        b2mu_flat_inds_distance_ = np.linalg.norm(
-            np.hstack([np.diff(b2mu_x_inds), np.diff(b2mu_y_inds)]),
-            axis=1
-        )
+        self.QE_ = som.quantization_error(X)
+        self.TE_ = som.topographic_error(X)
+        self.som_ = som
 
-        reordered_b2mu_x_inds, reordered_b2mu_y_inds = np.unravel_index(np.sort(b2mu_flat_inds_, axis=1), self.lattice_shape_)
-        reordered_b2mu_edges = np.column_stack([
-            reordered_b2mu_x_inds[:, 0], reordered_b2mu_y_inds[:, 0],
-            reordered_b2mu_x_inds[:, 1], reordered_b2mu_y_inds[:, 1]
-        ])
-        unique_b2mu_edges, unique_b2mu_flat_inds, unique_b2mu_counts = np.unique(reordered_b2mu_edges, axis=0, return_index=True, return_counts=True)
+        unique_b2mu_edges, unique_b2mu_counts, unique_b2mu_distances = self._calc_unique_b2mu_edges_counts_distances(X)
 
         self.unique_b2mu_edges_ = unique_b2mu_edges
         self.unique_b2mu_counts_ = unique_b2mu_counts
-        self.unique_b2mu_distances_ = b2mu_flat_inds_distance_[unique_b2mu_flat_inds]
+        self.unique_b2mu_distances_ = unique_b2mu_distances
 
-        self.QE_ = som.quantization_error(X)
-        self.TE_ = som.topographic_error(X)
-
-        self.som_ = som
         self.fitted_ = True
 
         if self.verbose:
@@ -147,6 +135,24 @@ class SomRepresentation():
             print(f"Topographic Error (TE): \t{self.TE_}")
 
         return self
+
+    def _calc_unique_b2mu_edges_counts_distances(self, X):
+        b2mu_flat_inds_ = np.argsort(self.som_._distance_from_weights(X), axis=1)[:, :2]
+        b2mu_x_inds, b2mu_y_inds = np.unravel_index(b2mu_flat_inds_, self.lattice_shape_)
+        b2mu_flat_inds_distance = np.linalg.norm(
+          np.hstack([np.diff(b2mu_x_inds), np.diff(b2mu_y_inds)]),
+          axis=1
+        )
+
+        reordered_b2mu_x_inds, reordered_b2mu_y_inds = np.unravel_index(np.sort(b2mu_flat_inds_, axis=1),
+                                                                        self.lattice_shape_)
+        reordered_b2mu_edges = np.column_stack([
+          reordered_b2mu_x_inds[:, 0], reordered_b2mu_y_inds[:, 0],
+          reordered_b2mu_x_inds[:, 1], reordered_b2mu_y_inds[:, 1]
+        ])
+        unique_b2mu_edges, unique_b2mu_flat_inds, unique_b2mu_counts = np.unique(reordered_b2mu_edges, axis=0, return_index=True, return_counts=True)
+
+        return unique_b2mu_edges, unique_b2mu_counts, b2mu_flat_inds_distance[unique_b2mu_flat_inds]
 
     def __require_fitted(self):
         assert hasattr(self, "fitted_") and self.fitted_, "This SOM representation has not been fitted yet."

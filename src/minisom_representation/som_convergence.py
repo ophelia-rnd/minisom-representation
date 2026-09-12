@@ -52,8 +52,11 @@ def plot_som_convergence_over_epochs(
     ax.plot(epoch_axis, tes, color="coral", label="TE")
     ax.hlines(te_ceiling, xmin=1, xmax=epoch_step_to, linestyle="dashed", color="grey", label="TE acceptance line")
 
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(lines1 + lines2, labels1 + labels2, loc="best")
+
     if show_fig:
-        plt.legend()
         plt.show()
 
     return fig, qes, tes

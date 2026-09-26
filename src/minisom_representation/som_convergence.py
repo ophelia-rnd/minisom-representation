@@ -18,6 +18,7 @@ def plot_som_convergence_over_epochs(
         verbose=True,
         show_fig=True
 ):
+    assert epoch_step_from > 1, f"epoch_step_from must be greater than 1 (got {epoch_step_from}), as epoch 1 is evaluated by default."
 
     epoch_axis = np.r_[1, np.arange(epoch_step_from, (epoch_step_to + 1), epoch_step)]
     qes, tes = [], []

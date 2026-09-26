@@ -9,9 +9,15 @@ requires-python = ">=3.9"
 authors = [{name = "Mate Balogh", email = "matebalogh@ophelia-rnd.dev"}]
 maintainers = [{name = "Mate Balogh", email = "matebalogh@ophelia-rnd.dev"}]
 license = "Apache-2.0"
+readme = "README.pypi.md"
 dynamic = ["version"]
 
-# Core dependencies installed when users run `pip install my-library`
+[project.urls]
+Homepage = "https://github.com/ophelia-rnd/minisom-representation"
+Repository = "https://github.com/ophelia-rnd/minisom-representation.git"
+Issues = "https://github.com/ophelia-rnd/minisom-representation/issues"
+
+# Core dependencies installed when users run `pip install minisom-representation`
 dependencies = [
     "numpy",
     "matplotlib",

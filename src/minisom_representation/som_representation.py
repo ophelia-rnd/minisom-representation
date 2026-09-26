@@ -25,9 +25,13 @@ class SomRepresentation():
         self.verbose = verbose
 
     @classmethod
-    def with_derived_params(cls, X, **kwargs):
+    def with_derived_params(cls, X, initial_sigma_factor=2.0, **kwargs):
         """Derives grid shape (d1, d2) and sigma from X, allowing explicit keyword overrides."""
-        derived_params = calc_som_hyparams(X, verbose=kwargs.get("verbose", False))
+        derived_params = calc_som_hyparams(
+            X,
+            initial_sigma_factor=initial_sigma_factor,
+            verbose=kwargs.get("verbose", False),
+        )
         return cls(**{**derived_params, **kwargs})
 
     @property

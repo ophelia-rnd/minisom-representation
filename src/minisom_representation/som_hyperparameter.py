@@ -14,7 +14,7 @@ def calc_recommended_lattice_side_ratio(X):
     eps = 1e-8
     lambda1 = max(float(lambda1), eps)
     lambda2 = max(float(lambda2), eps)
-    ratio = np.sqrt(lambda1 / lambda2)
+    ratio = float(np.sqrt(lambda1 / lambda2))
     return ratio
 
 def calc_recommended_lattice_sides(X):
@@ -27,7 +27,7 @@ def calc_recommended_lattice_sides(X):
 def calc_initial_sigma(d1, d2, factor=2.0):
     L = max(d1, d2)
     if L <= 1: return 1.0
-    return np.round(L / factor, 2)
+    return float(np.round(L / factor, 2))
 
 def calc_som_hyparams(X, initial_sigma_factor=2.0, verbose=False):
     total_node_count = calc_recommended_total_node_count(X)

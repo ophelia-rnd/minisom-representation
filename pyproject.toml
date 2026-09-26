@@ -12,17 +12,17 @@ license = "Apache-2.0"
 readme = "README.pypi.md"
 dynamic = ["version"]
 
-[project.urls]
-Homepage = "https://github.com/ophelia-rnd/minisom-representation"
-Repository = "https://github.com/ophelia-rnd/minisom-representation.git"
-Issues = "https://github.com/ophelia-rnd/minisom-representation/issues"
-
 # Core dependencies installed when users run `pip install minisom-representation`
 dependencies = [
     "numpy",
     "matplotlib",
     "minisom"
 ]
+
+[project.urls]
+Homepage = "https://github.com/ophelia-rnd/minisom-representation"
+Repository = "https://github.com/ophelia-rnd/minisom-representation.git"
+Issues = "https://github.com/ophelia-rnd/minisom-representation/issues"
 
 # Optional/development dependencies installed via `pip install -e .[dev]`
 [project.optional-dependencies]
